@@ -1,0 +1,10 @@
+target/
+.sonar/
+*.class
+*.jar
+*.war
+.idea/
+*.iml
+.classpath
+.project
+.settings/
