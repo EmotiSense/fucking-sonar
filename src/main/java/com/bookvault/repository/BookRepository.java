@@ -70,4 +70,20 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @return page of books by the author
      */
     Page<Book> findByAuthorIgnoreCase(String author, Pageable pageable);
+
+    /**
+     * Counts how many books belong to the given category.
+     *
+     * @param category the category
+     * @return count of books in that category
+     */
+    long countByCategory(Category category);
+
+    /**
+     * Checks whether any book belongs to the given category.
+     *
+     * @param category the category
+     * @return {@code true} if at least one book is in the category
+     */
+    boolean existsByCategory(Category category);
 }

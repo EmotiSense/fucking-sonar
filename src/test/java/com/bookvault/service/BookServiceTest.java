@@ -70,8 +70,8 @@ class BookServiceTest {
     void findById_existingBook_shouldReturn() {
         given(bookRepository.findById(1L)).willReturn(Optional.of(sampleBook));
         BookResponse result = bookService.findById(1L);
-        assertThat(result.getIsbn()).isEqualTo("978-0-06-112008-4");
-        assertThat(result.getTitle()).isEqualTo("To Kill a Mockingbird");
+        assertThat(result.isbn()).isEqualTo("978-0-06-112008-4");
+        assertThat(result.title()).isEqualTo("To Kill a Mockingbird");
     }
 
     @Test
@@ -86,12 +86,12 @@ class BookServiceTest {
         given(bookRepository.findByIsbn("978-0-06-112008-4"))
                 .willReturn(Optional.of(sampleBook));
         BookResponse result = bookService.findByIsbn("978-0-06-112008-4");
-        assertThat(result.getTitle()).isEqualTo("To Kill a Mockingbird");
+        assertThat(result.title()).isEqualTo("To Kill a Mockingbird");
     }
 
     @Test
     void create_newIsbn_shouldSaveBook() {
-        given(bookRepository.existsByIsbn(createRequest.getIsbn())).willReturn(false);
+        given(bookRepository.existsByIsbn(createRequest.isbn())).willReturn(false);
         given(categoryRepository.findById(1L)).willReturn(Optional.of(sampleCategory));
         given(bookRepository.save(any(Book.class))).willReturn(sampleBook);
         BookResponse result = bookService.create(createRequest);
@@ -101,7 +101,7 @@ class BookServiceTest {
 
     @Test
     void create_duplicateIsbn_shouldThrowBusinessRule() {
-        given(bookRepository.existsByIsbn(createRequest.getIsbn())).willReturn(true);
+        given(bookRepository.existsByIsbn(createRequest.isbn())).willReturn(true);
         assertThatThrownBy(() -> bookService.create(createRequest))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("already exists");
@@ -111,8 +111,7 @@ class BookServiceTest {
     void update_existingBook_shouldApplyChanges() {
         given(bookRepository.findById(1L)).willReturn(Optional.of(sampleBook));
         given(bookRepository.save(any(Book.class))).willReturn(sampleBook);
-        BookUpdateRequest updateRequest = new BookUpdateRequest();
-        updateRequest.setTitle("Updated Title");
+        BookUpdateRequest updateRequest = new BookUpdateRequest("Updated Title", null, null, null, null, null, null);
         BookResponse result = bookService.update(1L, updateRequest);
         assertThat(result).isNotNull();
         verify(bookRepository).save(sampleBook);
@@ -139,16 +138,12 @@ class BookServiceTest {
         given(bookRepository.findAllAvailable()).willReturn(List.of(sampleBook));
         List<BookResponse> result = bookService.findAvailable();
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).isAvailable()).isTrue();
+        assertThat(result.get(0).available()).isTrue();
     }
 
     private BookCreateRequest buildCreateRequest() {
-        BookCreateRequest req = new BookCreateRequest();
-        req.setIsbn("978-0-06-112008-4");
-        req.setTitle("To Kill a Mockingbird");
-        req.setAuthor("Harper Lee");
-        req.setTotalCopies(3);
-        req.setCategoryId(1L);
-        return req;
+        return new BookCreateRequest(
+                "978-0-06-112008-4", "To Kill a Mockingbird", "Harper Lee",
+                null, null, 3, null, 1L);
     }
 }

@@ -106,15 +106,15 @@ public class MemberService {
      */
     @Transactional
     public MemberResponse register(MemberCreateRequest request) {
-        assertEmailUnique(request.getEmail());
+        assertEmailUnique(request.email());
         String memberNumber = MemberNumberGenerator.generate();
         Member member = new Member(
                 memberNumber,
-                request.getFirstName(),
-                request.getLastName(),
-                request.getEmail(),
-                request.getPhone(),
-                request.getAddress());
+                request.firstName(),
+                request.lastName(),
+                request.email(),
+                request.phone(),
+                request.address());
         Member saved = memberRepository.save(member);
         return MemberResponse.from(saved);
     }
@@ -131,8 +131,8 @@ public class MemberService {
     @Transactional
     public MemberResponse update(Long id, MemberUpdateRequest request) {
         Member member = loadById(id);
-        if (request.getEmail() != null) {
-            assertEmailUniqueExcluding(request.getEmail(), id);
+        if (request.email() != null) {
+            assertEmailUniqueExcluding(request.email(), id);
         }
         applyUpdates(member, request);
         Member saved = memberRepository.save(member);
@@ -198,20 +198,20 @@ public class MemberService {
     }
 
     private void applyUpdates(Member member, MemberUpdateRequest request) {
-        if (request.getFirstName() != null) {
-            member.setFirstName(request.getFirstName());
+        if (request.firstName() != null) {
+            member.setFirstName(request.firstName());
         }
-        if (request.getLastName() != null) {
-            member.setLastName(request.getLastName());
+        if (request.lastName() != null) {
+            member.setLastName(request.lastName());
         }
-        if (request.getEmail() != null) {
-            member.setEmail(request.getEmail());
+        if (request.email() != null) {
+            member.setEmail(request.email());
         }
-        if (request.getPhone() != null) {
-            member.setPhone(request.getPhone());
+        if (request.phone() != null) {
+            member.setPhone(request.phone());
         }
-        if (request.getAddress() != null) {
-            member.setAddress(request.getAddress());
+        if (request.address() != null) {
+            member.setAddress(request.address());
         }
     }
 }

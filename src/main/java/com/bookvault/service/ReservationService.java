@@ -115,8 +115,8 @@ public class ReservationService {
      */
     @Transactional
     public ReservationResponse placeReservation(ReservationRequest request) {
-        Member member = memberService.loadById(request.getMemberId());
-        Book book = loadBook(request.getBookId());
+        Member member = memberService.loadById(request.memberId());
+        Book book = loadBook(request.bookId());
         assertMemberCanBorrow(member);
         assertNoOpenReservation(member, book);
         Reservation reservation = new Reservation(book, member, LocalDate.now());

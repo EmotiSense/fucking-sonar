@@ -2,12 +2,9 @@ package com.bookvault.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a book category (genre) in the library catalogue.
@@ -21,9 +18,6 @@ public class Category extends BaseEntity {
 
     @Column(name = "description", length = 500)
     private String description;
-
-    @OneToMany(mappedBy = "category")
-    private List<Book> books = new ArrayList<>();
 
     /** Required by JPA. */
     protected Category() {
@@ -40,59 +34,33 @@ public class Category extends BaseEntity {
         this.description = description;
     }
 
-    /**
-     * Returns the category name.
-     *
-     * @return category name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Sets the category name.
-     *
-     * @param name the new name; must not be null or blank
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * Returns the optional description.
-     *
-     * @return description, or {@code null} if not set
-     */
     public String getDescription() {
         return description;
     }
 
-    /**
-     * Sets the optional description.
-     *
-     * @param description the description text
-     */
     public void setDescription(String description) {
         this.description = description;
     }
 
-    /**
-     * Returns an unmodifiable view of the books in this category.
-     *
-     * @return immutable list of books
-     */
-    public List<Book> getBooks() {
-        return Collections.unmodifiableList(books);
-    }
-
     @Override
     public boolean equals(Object other) {
-        return super.equals(other);
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        Category category = (Category) other;
+        return Objects.equals(getId(), category.getId());
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hash(getId());
     }
 
     @Override

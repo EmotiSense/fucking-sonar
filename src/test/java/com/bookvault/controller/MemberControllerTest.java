@@ -98,10 +98,7 @@ class MemberControllerTest {
 
     @Test
     void register_invalidEmail_shouldReturn400() throws Exception {
-        MemberCreateRequest invalid = new MemberCreateRequest();
-        invalid.setFirstName("Alice");
-        invalid.setLastName("Smith");
-        invalid.setEmail("not-an-email");
+        MemberCreateRequest invalid = new MemberCreateRequest("Alice", "Smith", "not-an-email", null, null);
         mockMvc.perform(post("/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -110,10 +107,7 @@ class MemberControllerTest {
 
     @Test
     void register_blankFirstName_shouldReturn400() throws Exception {
-        MemberCreateRequest invalid = new MemberCreateRequest();
-        invalid.setFirstName("");
-        invalid.setLastName("Smith");
-        invalid.setEmail("alice@example.com");
+        MemberCreateRequest invalid = new MemberCreateRequest("", "Smith", "alice@example.com", null, null);
         mockMvc.perform(post("/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -122,8 +116,13 @@ class MemberControllerTest {
 
     @Test
     void suspend_shouldReturn200() throws Exception {
-        sampleResponse.setStatus(MemberStatus.SUSPENDED);
-        given(memberService.suspend(1L)).willReturn(sampleResponse);
+        MemberResponse suspended = new MemberResponse(
+                sampleResponse.id(), sampleResponse.memberNumber(),
+                sampleResponse.firstName(), sampleResponse.lastName(),
+                sampleResponse.fullName(), sampleResponse.email(),
+                sampleResponse.phone(), sampleResponse.address(),
+                sampleResponse.joinDate(), MemberStatus.SUSPENDED, null);
+        given(memberService.suspend(1L)).willReturn(suspended);
         mockMvc.perform(patch("/members/1/suspend"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("SUSPENDED"));
@@ -146,26 +145,14 @@ class MemberControllerTest {
     }
 
     private MemberResponse buildSampleResponse() {
-        MemberResponse response = new MemberResponse();
-        response.setId(1L);
-        response.setMemberNumber("BV-202401-000001");
-        response.setFirstName("Alice");
-        response.setLastName("Smith");
-        response.setFullName("Alice Smith");
-        response.setEmail("alice@example.com");
-        response.setPhone("555-0100");
-        response.setJoinDate(LocalDate.now());
-        response.setStatus(MemberStatus.ACTIVE);
-        return response;
+        return new MemberResponse(
+                1L, "BV-202401-000001", "Alice", "Smith", "Alice Smith",
+                "alice@example.com", "555-0100", null,
+                LocalDate.now(), MemberStatus.ACTIVE, null);
     }
 
     private MemberCreateRequest buildCreateRequest() {
-        MemberCreateRequest req = new MemberCreateRequest();
-        req.setFirstName("Alice");
-        req.setLastName("Smith");
-        req.setEmail("alice@example.com");
-        req.setPhone("555-0100");
-        return req;
+        return new MemberCreateRequest("Alice", "Smith", "alice@example.com", "555-0100", null);
     }
 
     @SuppressWarnings("unchecked")

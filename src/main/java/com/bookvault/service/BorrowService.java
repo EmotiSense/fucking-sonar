@@ -146,8 +146,8 @@ public class BorrowService {
      */
     @Transactional
     public BorrowRecordResponse borrowBook(BorrowRequest request) {
-        Member member = memberService.loadById(request.getMemberId());
-        Book book = loadBook(request.getBookId());
+        Member member = memberService.loadById(request.memberId());
+        Book book = loadBook(request.bookId());
         validateBorrow(member, book);
         book.decrementAvailable();
         bookRepository.save(book);

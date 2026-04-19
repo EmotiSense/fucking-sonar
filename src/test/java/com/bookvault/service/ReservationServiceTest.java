@@ -68,7 +68,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(pendingReservation));
         ReservationResponse result = reservationService.findById(1L);
         assertThat(result).isNotNull();
-        assertThat(result.getStatus()).isEqualTo(ReservationStatus.PENDING);
+        assertThat(result.status()).isEqualTo(ReservationStatus.PENDING);
     }
 
     @Test
@@ -169,13 +169,10 @@ class ReservationServiceTest {
                 .willReturn(List.of(pendingReservation));
         List<ReservationResponse> result = reservationService.findPendingByBook(1L);
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getStatus()).isEqualTo(ReservationStatus.PENDING);
+        assertThat(result.get(0).status()).isEqualTo(ReservationStatus.PENDING);
     }
 
     private ReservationRequest buildRequest(Long memberId, Long bookId) {
-        ReservationRequest req = new ReservationRequest();
-        req.setMemberId(memberId);
-        req.setBookId(bookId);
-        return req;
+        return new ReservationRequest(bookId, memberId);
     }
 }

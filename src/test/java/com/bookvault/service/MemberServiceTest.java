@@ -54,15 +54,15 @@ class MemberServiceTest {
                 .willReturn(new PageImpl<>(List.of(sampleMember)));
         var result = memberService.findAll(pageable);
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getEmail()).isEqualTo("alice@example.com");
+        assertThat(result.getContent().get(0).email()).isEqualTo("alice@example.com");
     }
 
     @Test
     void findById_existing_shouldReturn() {
         given(memberRepository.findById(1L)).willReturn(Optional.of(sampleMember));
         MemberResponse result = memberService.findById(1L);
-        assertThat(result.getFirstName()).isEqualTo("Alice");
-        assertThat(result.getFullName()).isEqualTo("Alice Smith");
+        assertThat(result.firstName()).isEqualTo("Alice");
+        assertThat(result.fullName()).isEqualTo("Alice Smith");
     }
 
     @Test
@@ -77,7 +77,7 @@ class MemberServiceTest {
         given(memberRepository.findByMemberNumber("BV-202401-000001"))
                 .willReturn(Optional.of(sampleMember));
         MemberResponse result = memberService.findByMemberNumber("BV-202401-000001");
-        assertThat(result.getMemberNumber()).isEqualTo("BV-202401-000001");
+        assertThat(result.memberNumber()).isEqualTo("BV-202401-000001");
     }
 
     @Test
@@ -101,8 +101,7 @@ class MemberServiceTest {
 
     @Test
     void update_validRequest_shouldApplyChanges() {
-        MemberUpdateRequest updateRequest = new MemberUpdateRequest();
-        updateRequest.setPhone("555-9999");
+        MemberUpdateRequest updateRequest = new MemberUpdateRequest(null, null, null, "555-9999", null);
         given(memberRepository.findById(1L)).willReturn(Optional.of(sampleMember));
         given(memberRepository.save(any(Member.class))).willReturn(sampleMember);
         MemberResponse result = memberService.update(1L, updateRequest);
@@ -139,11 +138,6 @@ class MemberServiceTest {
     }
 
     private MemberCreateRequest buildCreateRequest() {
-        MemberCreateRequest req = new MemberCreateRequest();
-        req.setFirstName("Bob");
-        req.setLastName("Jones");
-        req.setEmail("bob@example.com");
-        req.setPhone("555-0200");
-        return req;
+        return new MemberCreateRequest("Bob", "Jones", "bob@example.com", "555-0200", null);
     }
 }

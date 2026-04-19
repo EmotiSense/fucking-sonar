@@ -147,9 +147,6 @@ class BorrowServiceTest {
     }
 
     private BorrowRequest buildBorrowRequest(Long memberId, Long bookId) {
-        BorrowRequest req = new BorrowRequest();
-        req.setMemberId(memberId);
-        req.setBookId(bookId);
-        return req;
+        return new BorrowRequest(bookId, memberId);
     }
 }

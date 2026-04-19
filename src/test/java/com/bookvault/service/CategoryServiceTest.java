@@ -5,6 +5,7 @@ import com.bookvault.dto.request.CategoryRequest;
 import com.bookvault.dto.response.CategoryResponse;
 import com.bookvault.exception.BusinessRuleException;
 import com.bookvault.exception.ResourceNotFoundException;
+import com.bookvault.repository.BookRepository;
 import com.bookvault.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class CategoryServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private BookRepository bookRepository;
+
     @InjectMocks
     private CategoryService categoryService;
 
@@ -40,24 +44,25 @@ class CategoryServiceTest {
     @BeforeEach
     void setUp() {
         fictionCategory = new Category("Fiction", "Fictional works");
-        request = new CategoryRequest();
-        request.setName("Science");
-        request.setDescription("Science books");
+        request = new CategoryRequest("Science", "Science books");
     }
 
     @Test
     void findAll_shouldReturnAllCategories() {
         given(categoryRepository.findAll()).willReturn(List.of(fictionCategory));
+        given(bookRepository.countByCategory(fictionCategory)).willReturn(5L);
         List<CategoryResponse> result = categoryService.findAll();
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("Fiction");
+        assertThat(result.get(0).name()).isEqualTo("Fiction");
+        assertThat(result.get(0).bookCount()).isEqualTo(5L);
     }
 
     @Test
     void findById_existingId_shouldReturnCategory() {
         given(categoryRepository.findById(1L)).willReturn(Optional.of(fictionCategory));
+        given(bookRepository.countByCategory(fictionCategory)).willReturn(0L);
         CategoryResponse result = categoryService.findById(1L);
-        assertThat(result.getName()).isEqualTo("Fiction");
+        assertThat(result.name()).isEqualTo("Fiction");
     }
 
     @Test
@@ -94,6 +99,7 @@ class CategoryServiceTest {
     @Test
     void delete_emptyCategory_shouldDelete() {
         given(categoryRepository.findById(1L)).willReturn(Optional.of(fictionCategory));
+        given(bookRepository.existsByCategory(fictionCategory)).willReturn(false);
         categoryService.delete(1L);
         verify(categoryRepository).delete(fictionCategory);
     }

@@ -74,7 +74,7 @@ class FineServiceTest {
         given(fineRepository.findById(1L)).willReturn(Optional.of(outstandingFine));
         var result = fineService.findById(1L);
         assertThat(result).isNotNull();
-        assertThat(result.getAmount()).isEqualByComparingTo(new BigDecimal("6.00"));
+        assertThat(result.amount()).isEqualByComparingTo(new BigDecimal("6.00"));
     }
 
     @Test

@@ -5,6 +5,7 @@ import com.bookvault.dto.request.CategoryRequest;
 import com.bookvault.dto.response.CategoryResponse;
 import com.bookvault.exception.BusinessRuleException;
 import com.bookvault.exception.ResourceNotFoundException;
+import com.bookvault.repository.BookRepository;
 import com.bookvault.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,84 +22,51 @@ public class CategoryService {
     private static final String ENTITY_NAME = "Category";
 
     private final CategoryRepository categoryRepository;
+    private final BookRepository bookRepository;
 
-    /**
-     * Constructs the service with its required repository dependency.
-     *
-     * @param categoryRepository the category data store
-     */
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, BookRepository bookRepository) {
         this.categoryRepository = categoryRepository;
+        this.bookRepository = bookRepository;
     }
 
-    /**
-     * Returns all categories sorted by name.
-     *
-     * @return list of category responses
-     */
     public List<CategoryResponse> findAll() {
         return categoryRepository.findAll()
                 .stream()
-                .map(CategoryResponse::from)
+                .map(cat -> CategoryResponse.from(cat, bookRepository.countByCategory(cat)))
                 .toList();
     }
 
-    /**
-     * Returns a single category by its ID.
-     *
-     * @param id the category ID
-     * @return the category response
-     * @throws ResourceNotFoundException if no category exists with the given ID
-     */
     public CategoryResponse findById(Long id) {
         Category category = loadById(id);
-        return CategoryResponse.from(category);
+        return CategoryResponse.from(category, bookRepository.countByCategory(category));
     }
 
-    /**
-     * Creates a new category.
-     *
-     * @param request the creation request
-     * @return the created category response
-     * @throws BusinessRuleException if a category with the same name already exists
-     */
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
-        assertNameUnique(request.getName());
-        Category category = new Category(request.getName(), request.getDescription());
+        assertNameUnique(request.name());
+        Category category = new Category(request.name(), request.description());
         Category saved = categoryRepository.save(category);
-        return CategoryResponse.from(saved);
+        return CategoryResponse.from(saved, 0L);
     }
 
-    /**
-     * Updates an existing category.
-     *
-     * @param id      the category ID
-     * @param request the update request
-     * @return the updated category response
-     * @throws ResourceNotFoundException if no category exists with the given ID
-     * @throws BusinessRuleException     if the new name conflicts with another category
-     */
     @Transactional
     public CategoryResponse update(Long id, CategoryRequest request) {
         Category category = loadById(id);
-        assertNameUniqueExcluding(request.getName(), id);
-        applyUpdates(category, request);
+        assertNameUniqueExcluding(request.name(), id);
+        category.setName(request.name());
+        category.setDescription(request.description());
         Category saved = categoryRepository.save(category);
-        return CategoryResponse.from(saved);
+        return CategoryResponse.from(saved, bookRepository.countByCategory(saved));
     }
 
-    /**
-     * Deletes a category by its ID.
-     *
-     * @param id the category ID
-     * @throws ResourceNotFoundException if no category exists with the given ID
-     * @throws BusinessRuleException     if the category still has books assigned to it
-     */
     @Transactional
     public void delete(Long id) {
         Category category = loadById(id);
-        assertCategoryEmpty(category);
+        if (bookRepository.existsByCategory(category)) {
+            throw new BusinessRuleException(
+                    "Cannot delete category '" + category.getName()
+                            + "' because it still contains books");
+        }
         categoryRepository.delete(category);
     }
 
@@ -123,18 +91,5 @@ public class CategoryService {
                     throw new BusinessRuleException(
                             "A category with the name '" + name + "' already exists");
                 });
-    }
-
-    private void assertCategoryEmpty(Category category) {
-        if (!category.getBooks().isEmpty()) {
-            throw new BusinessRuleException(
-                    "Cannot delete category '" + category.getName()
-                            + "' because it still contains books");
-        }
-    }
-
-    private void applyUpdates(Category category, CategoryRequest request) {
-        category.setName(request.getName());
-        category.setDescription(request.getDescription());
     }
 }

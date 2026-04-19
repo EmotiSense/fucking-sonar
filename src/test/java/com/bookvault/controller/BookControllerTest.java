@@ -103,10 +103,7 @@ class BookControllerTest {
 
     @Test
     void create_missingIsbn_shouldReturn400() throws Exception {
-        BookCreateRequest invalidRequest = new BookCreateRequest();
-        invalidRequest.setTitle("Some Book");
-        invalidRequest.setAuthor("Author");
-        invalidRequest.setTotalCopies(1);
+        BookCreateRequest invalidRequest = new BookCreateRequest(null, "Some Book", "Author", null, null, 1, null, null);
         mockMvc.perform(post("/books")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
@@ -138,24 +135,15 @@ class BookControllerTest {
     }
 
     private BookResponse buildSampleResponse() {
-        BookResponse response = new BookResponse();
-        response.setId(1L);
-        response.setIsbn("978-0-06-112008-4");
-        response.setTitle("To Kill a Mockingbird");
-        response.setAuthor("Harper Lee");
-        response.setTotalCopies(3);
-        response.setAvailableCopies(3);
-        response.setAvailable(true);
-        return response;
+        return new BookResponse(
+                1L, "978-0-06-112008-4", "To Kill a Mockingbird", "Harper Lee",
+                null, null, 3, 3, null, null, true, null);
     }
 
     private BookCreateRequest buildCreateRequest() {
-        BookCreateRequest req = new BookCreateRequest();
-        req.setIsbn("978-0-06-112008-4");
-        req.setTitle("To Kill a Mockingbird");
-        req.setAuthor("Harper Lee");
-        req.setTotalCopies(3);
-        return req;
+        return new BookCreateRequest(
+                "978-0-06-112008-4", "To Kill a Mockingbird", "Harper Lee",
+                null, null, 3, null, null);
     }
 
     @SuppressWarnings("unchecked")

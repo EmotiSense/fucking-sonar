@@ -130,8 +130,8 @@ public class BookService {
      */
     @Transactional
     public BookResponse create(BookCreateRequest request) {
-        assertIsbnUnique(request.getIsbn());
-        Category category = resolveCategory(request.getCategoryId());
+        assertIsbnUnique(request.isbn());
+        Category category = resolveCategory(request.categoryId());
         Book book = buildBook(request, category);
         Book saved = bookRepository.save(book);
         return BookResponse.from(saved);
@@ -204,38 +204,38 @@ public class BookService {
 
     private Book buildBook(BookCreateRequest request, Category category) {
         Book book = new Book(
-                request.getIsbn(),
-                request.getTitle(),
-                request.getAuthor(),
-                request.getPublisher(),
-                request.getPublicationYear(),
-                request.getTotalCopies(),
+                request.isbn(),
+                request.title(),
+                request.author(),
+                request.publisher(),
+                request.publicationYear(),
+                request.totalCopies(),
                 category);
-        book.setDescription(request.getDescription());
+        book.setDescription(request.description());
         return book;
     }
 
     private void applyUpdates(Book book, BookUpdateRequest request) {
-        if (request.getTitle() != null) {
-            book.setTitle(request.getTitle());
+        if (request.title() != null) {
+            book.setTitle(request.title());
         }
-        if (request.getAuthor() != null) {
-            book.setAuthor(request.getAuthor());
+        if (request.author() != null) {
+            book.setAuthor(request.author());
         }
-        if (request.getPublisher() != null) {
-            book.setPublisher(request.getPublisher());
+        if (request.publisher() != null) {
+            book.setPublisher(request.publisher());
         }
-        if (request.getPublicationYear() != null) {
-            book.setPublicationYear(request.getPublicationYear());
+        if (request.publicationYear() != null) {
+            book.setPublicationYear(request.publicationYear());
         }
-        if (request.getDescription() != null) {
-            book.setDescription(request.getDescription());
+        if (request.description() != null) {
+            book.setDescription(request.description());
         }
-        if (request.getTotalCopies() != null) {
-            book.setTotalCopies(request.getTotalCopies());
+        if (request.totalCopies() != null) {
+            book.setTotalCopies(request.totalCopies());
         }
-        if (request.getCategoryId() != null) {
-            book.setCategory(loadCategory(request.getCategoryId()));
+        if (request.categoryId() != null) {
+            book.setCategory(loadCategory(request.categoryId()));
         }
     }
 }
